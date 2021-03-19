@@ -1,0 +1,7 @@
+apiVersion: networking.gravityloop.io/v1
+kind: SimpleIngress
+metadata:
+  name: simpleingress-sample
+spec:
+  # Add fields here
+  foo: bar

@@ -1,0 +1,7 @@
+domain: gravityloop.io
+repo: simpleingress
+resources:
+- group: networking
+  kind: SimpleIngress
+  version: v1
+version: "2"
