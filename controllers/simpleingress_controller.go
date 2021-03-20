@@ -1,6 +1,4 @@
 /*
-
-
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -18,8 +16,6 @@ package controllers
 
 import (
 	"context"
-	"net/http/httputil"
-	"net/url"
 
 	"github.com/go-logr/logr"
 	corev1 "k8s.io/api/core/v1"
@@ -29,6 +25,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	networkingv1 "simpleingress/api/v1"
+	"simpleingress/internal/pod"
 )
 
 // SimpleIngressReconciler reconciles a SimpleIngress object
@@ -55,24 +52,47 @@ func (r *SimpleIngressReconciler) Reconcile(req ctrl.Request) (ctrl.Result, erro
 		return ctrl.Result{}, err
 	}
 
-	// if the status does not match the spec, then set status fields according to spec
-	if inst.Status.Host == "" || inst.Status.Host != inst.Spec.Host {
-		inst.Status.Host = inst.Spec.Host
-	} else if inst.Status.ServiceName == "" || inst.Status.ServiceName != inst.Spec.ServiceName {
-		inst.Status.ServiceName = inst.Spec.ServiceName
+	if inst.Status.Phase == "" {
+		inst.Status.Phase = networkingv1.PhasePending
 	}
 
-	//convert inst.Spec.ServiceName to *url.URL
-	backendTarget := &url.URL{
-		Host: inst.Spec.ServiceName,
+	switch inst.Status.Phase {
+
+	case networkingv1.PhasePending:
+		log.Info("State: PENDING")
+
+		pod := pod.New(inst)
+		err := ctrl.SetControllerReference(inst, pod, r.Scheme)
+		if err != nil {
+			// requeue with error
+			return ctrl.Result{}, err
+		}
+
+		query := &corev1.Pod{}
+		err = r.Get(context.TODO(), req.NamespacedName, query)
+		if err != nil && errors.IsNotFound(err) {
+			err = r.Create(context.TODO(), pod)
+			if err != nil {
+				return ctrl.Result{}, err
+			}
+			log.Info("pod successfully created", "name", pod.Name)
+			return ctrl.Result{}, nil
+		} else if err != nil {
+			// requeue with err
+			log.Error(err, "cannot create pod")
+			return ctrl.Result{}, err
+		} else if query.Status.Phase == corev1.PodFailed || query.Status.Phase == corev1.PodSucceeded {
+			// pod already finished or errored out`
+			log.Info("container terminated", "reason", query.Status.Reason, "message", query.Status.Message)
+			inst.Status.Phase = networkingv1.PhaseReady
+		} else {
+			// don't requeue, it will happen automatically when pod status changes
+			return ctrl.Result{}, nil
+		}
+		// POST request to pod /routeMap {"backend": inst.Spec.ServiceName}
+		// if 20
+
 	}
-	//config reverse proxy here by passing in backendTarget to NewSingleHostReverseProxy
-	inst.Proxy = httputil.NewSingleHostReverseProxy(backendTarget)
-	
-
-
-
-
 
 	return ctrl.Result{}, nil
 }
