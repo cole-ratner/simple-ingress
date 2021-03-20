@@ -68,8 +68,7 @@ func updateRouteMap(w http.ResponseWriter, r *http.Request) {
 
 func reverseProxy(w http.ResponseWriter, r *http.Request) {
 	if IngressRule.Backend == "" {
-		http.Error(w, "proxy error: ingress rule not set", http.StatusBadRequest)
-		log.Printf("%d %s %s %s %s", http.StatusBadRequest, http.StatusText(http.StatusBadRequest), r.Method, r.Host, "proxy error: ingress rule not set")
+		makeHTTPError(w, r, http.StatusBadRequest, http.StatusText(http.StatusBadRequest), "proxy error: ingress rule not set")
 		return
 	}
 	target, _ := url.Parse(fmt.Sprintf("http://%s", IngressRule.Backend))
