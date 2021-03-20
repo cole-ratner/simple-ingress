@@ -28,10 +28,15 @@ type SimpleIngressSpec struct {
 	ServiceName string `json:"serviceName"`
 }
 
+const (
+	PhasePending = "PENDING"
+	PhaseReady   = "READY"
+	PhaseError   = "ERROR"
+)
+
 // SimpleIngressStatus defines the observed state of SimpleIngress
 type SimpleIngressStatus struct {
-	Host        string `json:"host"`
-	ServiceName string `json:"serviceName"`
+	Phase string `json:"phase"`
 }
 
 // +kubebuilder:object:root=true
