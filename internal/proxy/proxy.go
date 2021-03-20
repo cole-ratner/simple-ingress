@@ -11,7 +11,7 @@ import (
 )
 
 type routeMap struct {
-	Host 	string `json:"host"`
+	Host    string `json:"host"`
 	Backend string `json:"backend"`
 }
 
@@ -26,25 +26,26 @@ func main() {
 	log.Fatal(http.ListenAndServe(":8080", mux))
 }
 
-func makeHTTPError(w http.ResponseWriter, r*http.Request, statusCode int , statustext, msg string) {
+func makeHTTPError(w http.ResponseWriter, r *http.Request, statusCode int, statustext, msg string) {
 	if msg == "" {
 		http.Error(w, statustext, statusCode)
+	} else {
+		http.Error(w, msg, statusCode)
 	}
-	http.Error(w, msg, statusCode)
 	log.Printf("%d %s %s %s %s", statusCode, statustext, r.Method, r.Host, msg)
 }
 
 func updateRouteMap(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
-		makeHTTPError(w,r, http.StatusMethodNotAllowed, http.StatusText(http.StatusMethodNotAllowed), "")
-		return	
+		makeHTTPError(w, r, http.StatusMethodNotAllowed, http.StatusText(http.StatusMethodNotAllowed), "")
+		return
 	}
 
 	if r.Body == http.NoBody {
 		makeHTTPError(w, r, http.StatusBadRequest, http.StatusText(http.StatusBadRequest), "missing request body")
 		return
 	}
-	
+
 	body, err := ioutil.ReadAll(r.Body)
 	if body != nil {
 		defer r.Body.Close()
@@ -73,7 +74,7 @@ func reverseProxy(w http.ResponseWriter, r *http.Request) {
 	}
 	target, _ := url.Parse(fmt.Sprintf("http://%s", IngressRule.Backend))
 
-	proxy := httputil.NewSingleHostReverseProxy(target)		
+	proxy := httputil.NewSingleHostReverseProxy(target)
 	proxy.ServeHTTP(w, r)
 	log.Printf("%s %s", r.Method, r.Host)
 }
