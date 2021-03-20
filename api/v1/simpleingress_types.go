@@ -17,8 +17,6 @@ limitations under the License.
 package v1
 
 import (
-	"net/http/httputil"
-
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -44,9 +42,8 @@ type SimpleIngress struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
-	Spec   SimpleIngressSpec      `json:"spec,omitempty"`
-	Status SimpleIngressStatus    `json:"status,omitempty"`
-	Proxy  *httputil.ReverseProxy `json:"proxy,omitempty"`
+	Spec   SimpleIngressSpec   `json:"spec,omitempty"`
+	Status SimpleIngressStatus `json:"status,omitempty"`
 }
 
 // +kubebuilder:object:root=true
