@@ -25,7 +25,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	networkingv1 "simpleingress/api/v1"
-	pod "simpleingress/internal/pod"
 )
 
 // SimpleIngressReconciler reconciles a SimpleIngress object
@@ -60,7 +59,7 @@ func (r *SimpleIngressReconciler) Reconcile(req ctrl.Request) (ctrl.Result, erro
 	// if pending, then no pod can be found, so create one
 	case networkingv1.PhasePending:
 		log.Info("Phase: PENDING")
-		pod := pod.New(inst)
+		pod := newPod(inst)
 		err := ctrl.SetControllerReference(inst, pod, r.Scheme)
 		if err != nil {
 			return ctrl.Result{}, err
@@ -103,4 +102,33 @@ func (r *SimpleIngressReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		return err
 	}
 	return nil
+}
+
+// newPod returns a new instance of a corev1.Pod that is based on a kolamiti92/simpleproxy container
+func newPod(cr *networkingv1.SimpleIngress) *corev1.Pod {
+	return &corev1.Pod{
+		ObjectMeta: cr.ObjectMeta,
+		Spec: corev1.PodSpec{
+			Containers: []corev1.Container{
+				{
+					Name:  "simpleproxy",
+					Image: "kolamiti92/simpleproxy",
+					Ports: []corev1.ContainerPort{
+						{
+							Name:          "http",
+							ContainerPort: 80,
+							Protocol:      "TCP",
+						},
+					},
+					Env: []corev1.EnvVar{
+						{
+							Name:  "BACKEND",
+							Value: cr.Spec.ServiceName,
+						},
+					},
+				},
+			},
+			RestartPolicy: corev1.RestartPolicyOnFailure,
+		},
+	}
 }
