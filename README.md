@@ -5,7 +5,7 @@
 https://hub.docker.com/repository/docker/kolamiti92/simpleproxy/
 
 **simpleingress** <br>
-https://hub.docker.com/repository/docker/kolamiti92/simpleingress
+https://hub.docker.com/repository/docker/kolamiti92/simpleingress/
 
 
 
