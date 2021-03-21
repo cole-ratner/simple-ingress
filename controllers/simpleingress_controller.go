@@ -58,7 +58,6 @@ func (r *SimpleIngressReconciler) Reconcile(req ctrl.Request) (ctrl.Result, erro
 
 	switch inst.Status.Phase {
 	// if pending, then no pod can be found, so create one
-	// then POST request to pod /routeMap {"backend": inst.Spec.ServiceName}
 	case networkingv1.PhasePending:
 		log.Info("Phase: PENDING")
 		pod := pod.New(inst)
