@@ -94,8 +94,13 @@ func (r *SimpleIngressReconciler) Reconcile(req ctrl.Request) (ctrl.Result, erro
 }
 
 func (r *SimpleIngressReconciler) SetupWithManager(mgr ctrl.Manager) error {
-	return ctrl.NewControllerManagedBy(mgr).
+	err := ctrl.NewControllerManagedBy(mgr).
 		For(&networkingv1.SimpleIngress{}).
 		Owns(&corev1.Pod{}).
 		Complete(r)
+
+	if err != nil {
+		return err
+	}
+	return nil
 }
