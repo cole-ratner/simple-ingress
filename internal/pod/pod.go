@@ -21,6 +21,12 @@ func New(cr *networkingv1.SimpleIngress) *corev1.Pod {
 							Protocol:      "TCP",
 						},
 					},
+					Env: []corev1.EnvVar{
+						{
+							Name: "BACKEND", 
+							Value: cr.Spec.ServiceName,
+						},
+					},
 				},
 			},
 			RestartPolicy: corev1.RestartPolicyOnFailure,
