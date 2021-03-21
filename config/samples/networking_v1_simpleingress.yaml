@@ -3,5 +3,5 @@ kind: SimpleIngress
 metadata:
   name: simpleingress-sample
 spec:
-  # Add fields here
-  foo: bar
+  host: gravityloop.io
+  serviceName: http-echo-svc
