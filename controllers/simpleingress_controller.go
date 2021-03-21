@@ -25,7 +25,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	networkingv1 "simpleingress/api/v1"
-	"simpleingress/internal/pod"
+	pod "simpleingress/internal/pod"
 )
 
 // SimpleIngressReconciler reconciles a SimpleIngress object
