@@ -2,10 +2,10 @@
 
 
 **simpleproxy** <br>
-https://hub.docker.com/repository/docker/kolamiti92/simpleproxy/general#
+https://hub.docker.com/repository/docker/kolamiti92/simpleproxy/
 
-
-
+**simpleingress** <br>
+https://hub.docker.com/repository/docker/kolamiti92/simpleingress
 
 
 
