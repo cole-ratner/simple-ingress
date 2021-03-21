@@ -16,9 +16,9 @@ func New(cr *networkingv1.SimpleIngress) *corev1.Pod {
 					Image: "kolamiti92/simpleproxy",
 					Ports: []corev1.ContainerPort{
 						{
-							Name: "http",
+							Name:          "http",
 							ContainerPort: 8080,
-							Protocol: "TCP",
+							Protocol:      "TCP",
 						},
 					},
 				},
