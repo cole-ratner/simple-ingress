@@ -12,4 +12,5 @@ FROM alpine:3.13
 RUN apk update
 
 COPY --from=builder /bin/simpleproxy /bin/simpleproxy
+ENV BACKEND=""
 ENTRYPOINT [ "/bin/simpleproxy" ]

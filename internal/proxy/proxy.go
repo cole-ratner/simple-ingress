@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"net/http/httputil"
 	"net/url"
+	"os"
 )
 
 type routeMap struct {
@@ -16,6 +17,11 @@ type routeMap struct {
 }
 
 var IngressRule routeMap
+
+func init() {
+	b := os.Getenv("BACKEND")
+	IngressRule.Backend = b
+}
 
 func main() {
 	mux := http.NewServeMux()
