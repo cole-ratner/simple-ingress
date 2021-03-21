@@ -57,43 +57,40 @@ func (r *SimpleIngressReconciler) Reconcile(req ctrl.Request) (ctrl.Result, erro
 	}
 
 	switch inst.Status.Phase {
-
+	// if pending, then no pod can be found, so create one
+	// then POST request to pod /routeMap {"backend": inst.Spec.ServiceName}
 	case networkingv1.PhasePending:
-		log.Info("State: PENDING")
-
+		log.Info("Phase: PENDING")
 		pod := pod.New(inst)
 		err := ctrl.SetControllerReference(inst, pod, r.Scheme)
 		if err != nil {
-			// requeue with error
 			return ctrl.Result{}, err
 		}
 
+		err = r.Create(context.TODO(), pod)
+		if err != nil {
+			log.Error(err, "pod creation failed")
+			return ctrl.Result{}, err
+		}
+		log.Info("pod creation succeeded", "name", pod.Name)
+		return ctrl.Result{}, nil
+	case networkingv1.PhaseReady:
+		log.Info("Phase: READY")
 		query := &corev1.Pod{}
 		err = r.Get(context.TODO(), req.NamespacedName, query)
-		if err != nil && errors.IsNotFound(err) {
-			err = r.Create(context.TODO(), pod)
-			if err != nil {
-				return ctrl.Result{}, err
-			}
-			log.Info("pod successfully created", "name", pod.Name)
-			return ctrl.Result{}, nil
-		} else if err != nil {
-			// requeue with err
-			log.Error(err, "cannot create pod")
+		if err != nil {
+			log.Error(err, "could not get pod", "reason", query.Status.Reason, "message", query.Status.Message)
 			return ctrl.Result{}, err
-		} else if query.Status.Phase == corev1.PodFailed || query.Status.Phase == corev1.PodSucceeded {
-			// pod already finished or errored out`
+		} else if query.Status.Phase == corev1.PodFailed {
 			log.Info("container terminated", "reason", query.Status.Reason, "message", query.Status.Message)
-			inst.Status.Phase = networkingv1.PhaseReady
-		} else {
-			// don't requeue, it will happen automatically when pod status changes
-			return ctrl.Result{}, nil
+			inst.Status.Phase = networkingv1.PhaseError
 		}
-		// POST request to pod /routeMap {"backend": inst.Spec.ServiceName}
-		// if 20
+		return ctrl.Result{}, nil
 
+	case networkingv1.PhaseError:
+		log.Info("Phase: ERROR")
+		return ctrl.Result{}, err
 	}
-
 	return ctrl.Result{}, nil
 }
 
