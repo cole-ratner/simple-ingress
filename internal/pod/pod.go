@@ -12,12 +12,12 @@ func New(cr *networkingv1.SimpleIngress) *corev1.Pod {
 		Spec: corev1.PodSpec{
 			Containers: []corev1.Container{
 				{
-					Name:  "SimpleIngressReverseProxy-{{.cr.Host}}",
+					Name:  "simpleproxy",
 					Image: "kolamiti92/simpleproxy",
 					Ports: []corev1.ContainerPort{
 						{
 							Name:          "http",
-							ContainerPort: 8080,
+							ContainerPort: 80,
 							Protocol:      "TCP",
 						},
 					},
